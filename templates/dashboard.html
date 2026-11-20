@@ -1,0 +1,635 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Energy AI | Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">⚡</div>
+
+            <div>
+                <h2>SmartEnergy</h2>
+                <span>AI Power Manager</span>
+            </div>
+        </div>
+
+        <nav class="navigation">
+
+            <a href="/" class="nav-item active">
+                <span>🏠</span>
+                Dashboard
+            </a>
+
+            <a href="/devices" class="nav-item">
+                <span>🔌</span>
+                Devices
+            </a>
+
+            <a href="/analytics" class="nav-item">
+                <span>📊</span>
+                Analytics
+            </a>
+
+            <a href="/forecast" class="nav-item">
+                <span>🔮</span>
+                AI Forecast
+            </a>
+
+            <a href="/anomalies" class="nav-item">
+                <span>🚨</span>
+                Anomalies
+            </a>
+
+            <a href="/advisor" class="nav-item">
+                <span>💡</span>
+                AI Advisor
+            </a>
+
+            <a href="/reports" class="nav-item">
+                <span>📑</span>
+                Reports
+            </a>
+
+        </nav>
+
+        <div class="sidebar-footer">
+
+            <div class="system-status">
+                <span class="status-dot"></span>
+
+                <div>
+                    <strong>System Online</strong>
+                    <small>AI services active</small>
+                </div>
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- HEADER -->
+        <header class="topbar">
+
+            <div>
+                <p class="eyebrow">ENERGY MANAGEMENT PLATFORM</p>
+
+                <h1>Energy Dashboard</h1>
+
+                <p class="subtitle">
+                    Monitor, analyze and optimize your energy consumption.
+                </p>
+            </div>
+
+            <div class="topbar-actions">
+
+                <div class="live-indicator">
+                    <span></span>
+                    Live Monitoring
+                </div>
+
+                <button class="profile-button">
+                    AI
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- KPI CARDS -->
+        <section class="stats-grid">
+
+            <div class="stat-card">
+
+                <div class="stat-icon blue">
+                    ⚡
+                </div>
+
+                <div>
+                    <p>Total Energy</p>
+
+                    <h2 id="totalEnergy">
+                        --
+                    </h2>
+
+                    <span class="stat-description">
+                        Monitoring period
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon green">
+                    ₹
+                </div>
+
+                <div>
+                    <p>Estimated Cost</p>
+
+                    <h2 id="estimatedCost">
+                        --
+                    </h2>
+
+                    <span class="stat-description">
+                        Based on ₹8 / kWh
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon orange">
+                    ⏱
+                </div>
+
+                <div>
+                    <p>Peak Hour</p>
+
+                    <h2 id="peakHour">
+                        --
+                    </h2>
+
+                    <span class="stat-description">
+                        Highest consumption period
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon purple">
+                    ★
+                </div>
+
+                <div>
+                    <p>Efficiency Score</p>
+
+                    <h2 id="efficiencyScore">
+                        --
+                    </h2>
+
+                    <span class="stat-description">
+                        Application-defined score
+                    </span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CHART AREA -->
+        <section class="dashboard-grid">
+
+            <!-- DAILY CONSUMPTION -->
+            <div class="panel large-panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <h3>Energy Consumption Trend</h3>
+
+                        <p>
+                            Daily electricity consumption
+                        </p>
+                    </div>
+
+                    <span class="panel-badge">
+                        30 Days
+                    </span>
+
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="dailyChart"></canvas>
+                </div>
+
+            </div>
+
+
+            <!-- DEVICE BREAKDOWN -->
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <h3>Device Consumption</h3>
+
+                        <p>
+                            Energy by device
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="chart-container device-chart">
+                    <canvas id="deviceChart"></canvas>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- INSIGHTS -->
+        <section class="bottom-grid">
+
+            <div class="panel insight-panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <h3>🤖 AI Energy Insight</h3>
+
+                        <p>
+                            Automated analysis
+                        </p>
+                    </div>
+
+                    <span class="ai-badge">
+                        AI
+                    </span>
+
+                </div>
+
+                <div class="ai-message">
+
+                    <div class="ai-icon">
+                        ✨
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Optimization Opportunity
+                        </strong>
+
+                        <p id="aiInsight">
+                            Analyzing your energy consumption...
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <h3>System Overview</h3>
+
+                        <p>
+                            Current platform status
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="overview-list">
+
+                    <div class="overview-item">
+
+                        <span>🔌</span>
+
+                        <div>
+                            <strong>7</strong>
+                            <small>Connected Devices</small>
+                        </div>
+
+                        <span class="online">
+                            Active
+                        </span>
+
+                    </div>
+
+
+                    <div class="overview-item">
+
+                        <span>📊</span>
+
+                        <div>
+                            <strong>5,040</strong>
+                            <small>Energy Records</small>
+                        </div>
+
+                        <span class="online">
+                            Ready
+                        </span>
+
+                    </div>
+
+
+                    <div class="overview-item">
+
+                        <span>🤖</span>
+
+                        <div>
+                            <strong>2</strong>
+                            <small>ML Models</small>
+                        </div>
+
+                        <span class="online">
+                            Active
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- FOOTER -->
+        <footer>
+
+            <span>
+                SmartEnergy AI
+            </span>
+
+            <span>
+                AI-Assisted Smart Energy Consumption & Power Management System
+            </span>
+
+        </footer>
+
+    </main>
+
+
+    <!-- DASHBOARD JAVASCRIPT -->
+    <script>
+
+        let dailyChart;
+        let deviceChart;
+
+
+        // ==========================================
+        // LOAD SUMMARY
+        // ==========================================
+
+        async function loadSummary() {
+
+            const response =
+                await fetch("/api/summary");
+
+            const data =
+                await response.json();
+
+
+            document.getElementById("totalEnergy").textContent =
+                data.total_energy_kwh.toLocaleString() + " kWh";
+
+
+            document.getElementById("estimatedCost").textContent =
+                "₹" + data.estimated_cost.toLocaleString();
+
+
+            document.getElementById("peakHour").textContent =
+                String(data.peak_hour).padStart(2, "0") + ":00";
+
+
+            document.getElementById("efficiencyScore").textContent =
+                data.efficiency_score + "/100";
+
+
+            document.getElementById("aiInsight").textContent =
+                "Peak consumption occurs around " +
+                String(data.peak_hour).padStart(2, "0") +
+                ":00. Consider shifting non-essential activities away from this period.";
+
+        }
+
+
+        // ==========================================
+        // DAILY CHART
+        // ==========================================
+
+        async function loadDailyChart() {
+
+            const response =
+                await fetch("/api/daily-consumption");
+
+            const data =
+                await response.json();
+
+
+            const labels =
+                data.map(item => item.date);
+
+            const values =
+                data.map(item => item.energy_kwh);
+
+
+            const context =
+                document
+                .getElementById("dailyChart")
+                .getContext("2d");
+
+
+            dailyChart =
+                new Chart(context, {
+
+                    type: "line",
+
+                    data: {
+
+                        labels: labels,
+
+                        datasets: [{
+
+                            label: "Energy (kWh)",
+
+                            data: values,
+
+                            borderWidth: 3,
+
+                            tension: 0.35,
+
+                            fill: true
+
+                        }]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        plugins: {
+
+                            legend: {
+                                display: false
+                            }
+
+                        },
+
+                        scales: {
+
+                            y: {
+
+                                beginAtZero: false,
+
+                                grid: {
+                                    color: "rgba(0,0,0,0.06)"
+                                }
+
+                            },
+
+                            x: {
+
+                                grid: {
+                                    display: false
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                });
+
+        }
+
+
+        // ==========================================
+        // DEVICE CHART
+        // ==========================================
+
+        async function loadDeviceChart() {
+
+            const response =
+                await fetch("/api/device-consumption");
+
+            const data =
+                await response.json();
+
+
+            const labels =
+                data.map(item => item.device_name);
+
+            const values =
+                data.map(item => item.energy_kwh);
+
+
+            const context =
+                document
+                .getElementById("deviceChart")
+                .getContext("2d");
+
+
+            deviceChart =
+                new Chart(context, {
+
+                    type: "doughnut",
+
+                    data: {
+
+                        labels: labels,
+
+                        datasets: [{
+
+                            data: values,
+
+                            borderWidth: 2
+
+                        }]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        plugins: {
+
+                            legend: {
+
+                                position: "bottom",
+
+                                labels: {
+                                    padding: 14
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                });
+
+        }
+
+
+        // ==========================================
+        // INITIALIZE DASHBOARD
+        // ==========================================
+
+        async function initializeDashboard() {
+
+            try {
+
+                await loadSummary();
+
+                await loadDailyChart();
+
+                await loadDeviceChart();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Dashboard loading error:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        initializeDashboard();
+
+    </script>
+
+</body>
+
+</html>
+```

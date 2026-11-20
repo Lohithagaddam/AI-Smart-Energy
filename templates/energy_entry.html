@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Consumption Entry</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px 15px;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            text-align: center;
+            color: #166534;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-top: 16px;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 13px;
+            background: #15803d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #166534;
+        }
+
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .messages {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <h2>Energy Consumption Entry</h2>
+        <p class="subtitle">Enter your appliance electricity usage details</p>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="messages">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('add_energy_record') }}">
+
+            <label for="device_name">Appliance Name</label>
+            <input
+                type="text"
+                id="device_name"
+                name="device_name"
+                placeholder="Example: Air Conditioner"
+                required
+            >
+
+            <label for="rated_power_watts">Rated Power (Watts)</label>
+            <input
+                type="number"
+                id="rated_power_watts"
+                name="rated_power_watts"
+                min="1"
+                step="any"
+                placeholder="Example: 1500"
+                required
+            >
+
+            <label for="usage_hours_per_day">Usage Hours Per Day</label>
+            <input
+                type="number"
+                id="usage_hours_per_day"
+                name="usage_hours_per_day"
+                min="0.01"
+                max="24"
+                step="any"
+                placeholder="Example: 5"
+                required
+            >
+
+            <label for="usage_days">Number of Usage Days</label>
+            <input
+                type="number"
+                id="usage_days"
+                name="usage_days"
+                min="1"
+                max="31"
+                placeholder="Example: 30"
+                required
+            >
+
+            <label for="tariff">Electricity Tariff (₹ per kWh)</label>
+            <input
+                type="number"
+                id="tariff"
+                name="tariff"
+                min="0"
+                step="any"
+                placeholder="Example: 7"
+                required
+            >
+
+            <button type="submit">Calculate and Save Consumption</button>
+
+        </form>
+
+        <a class="back" href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+
+    </div>
+</body>
+</html>

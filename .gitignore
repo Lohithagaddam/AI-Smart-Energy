@@ -1,0 +1,30 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+database/*.db
+instance/
+.DS_Store
+
+# Ignore all virtual environments
+**/.venv/
+**/venv/
+
+# Ignore Python cache
+**/__pycache__/
+*.pyc
+
+# Ignore database files
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+
+# Ignore environment secrets
+.env
+.env.*
+
+# Ignore duplicate nested project
+/AI-smart-energy/
+

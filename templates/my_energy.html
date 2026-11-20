@@ -1,0 +1,606 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SmartEnergy AI | My Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">&#9889;</div>
+            <div>
+                <h2>SmartEnergy</h2>
+                <span>AI Power Manager</span>
+            </div>
+        </div>
+
+        <nav class="navigation">
+
+            <a href="/my-energy" class="nav-item active">
+                <span>&#127968;</span>
+                My Dashboard
+            </a>
+
+            <a href="/add-energy-record" class="nav-item">
+                <span>&#128221;</span>
+                Add Energy Record
+            </a>
+
+            <a href="/" class="nav-item">
+                <span>&#128202;</span>
+                Dataset Dashboard
+            </a>
+
+            <a href="/logout" class="nav-item">
+                <span>&#128682;</span>
+                Logout
+            </a>
+
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="system-status">
+                <span class="status-dot"></span>
+                <div>
+                    <strong>Personal Dashboard</strong>
+                    <small>Your energy data</small>
+                </div>
+            </div>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- HEADER -->
+        <header class="topbar">
+
+            <div>
+                <p class="eyebrow">PERSONAL ENERGY MANAGEMENT</p>
+
+                <h1>My Energy Dashboard</h1>
+
+                <p class="subtitle">
+                    Welcome, {{ session.get('username', 'User') }}!
+                    Monitor and optimize your personal energy consumption.
+                </p>
+            </div>
+
+            <div class="topbar-actions">
+
+                <div class="live-indicator">
+                    <span></span>
+                    Personal Data
+                </div>
+
+                <button class="profile-button">
+                    {{ session.get('username', 'U')[:1]|upper }}
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- KPI CARDS -->
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-icon blue">&#9889;</div>
+                <div>
+                    <p>Total Energy</p>
+                    <h2 id="totalEnergy">--</h2>
+                    <span class="stat-description">
+                        Your recorded consumption
+                    </span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon green">&#8377;</div>
+                <div>
+                    <p>Estimated Cost</p>
+                    <h2 id="estimatedCost">--</h2>
+                    <span class="stat-description">
+                        Based on your entered tariff
+                    </span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon orange">&#128203;</div>
+                <div>
+                    <p>Total Records</p>
+                    <h2 id="totalRecords">--</h2>
+                    <span class="stat-description">
+                        Saved appliance entries
+                    </span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon purple">&#128268;</div>
+                <div>
+                    <p>Total Appliances</p>
+                    <h2 id="totalDevices">--</h2>
+                    <span class="stat-description">
+                        Unique appliances recorded
+                    </span>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- CHART AREA -->
+        <section class="dashboard-grid">
+
+            <div class="panel large-panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h3>My Energy Consumption Trend</h3>
+                        <p>Daily consumption from your saved records</p>
+                    </div>
+
+                    <span class="panel-badge">Personal Data</span>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="dailyChart"></canvas>
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h3>My Device Consumption</h3>
+                        <p>Energy consumption by appliance</p>
+                    </div>
+                </div>
+
+                <div class="chart-container device-chart">
+                    <canvas id="deviceChart"></canvas>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- PERSONAL INSIGHTS AND OVERVIEW -->
+        <section class="bottom-grid">
+
+            <div class="panel insight-panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h3>&#129302; Personal Energy Insight</h3>
+                        <p>Analysis of your appliance records</p>
+                    </div>
+
+                    <span class="ai-badge">AI</span>
+                </div>
+
+                <div class="ai-message">
+
+                    <div class="ai-icon">&#10024;</div>
+
+                    <div>
+                        <strong>Optimization Opportunity</strong>
+
+                        <p id="aiInsight">
+                            Analyzing your personal energy consumption...
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h3>My Energy Overview</h3>
+                        <p>Personal account information</p>
+                    </div>
+                </div>
+
+                <div class="overview-list">
+
+                    <div class="overview-item">
+                        <span>&#128100;</span>
+
+                        <div>
+                            <strong>
+                                {{ session.get('username', 'User') }}
+                            </strong>
+                            <small>Logged-in user</small>
+                        </div>
+
+                        <span class="online">Active</span>
+                    </div>
+
+                    <div class="overview-item">
+                        <span>&#128203;</span>
+
+                        <div>
+                            <strong id="overviewRecords">0</strong>
+                            <small>Personal energy records</small>
+                        </div>
+
+                        <span class="online">Saved</span>
+                    </div>
+
+                    <div class="overview-item">
+                        <span>&#128268;</span>
+
+                        <div>
+                            <strong id="overviewDevices">0</strong>
+                            <small>Personal appliances</small>
+                        </div>
+
+                        <span class="online">Tracked</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- NEW: RECENT ENERGY RECORDS -->
+        <section class="panel" style="margin-bottom:25px;">
+
+            <div class="panel-header">
+                <div>
+                    <h3>My Recent Energy Records</h3>
+                    <p>
+                        Appliance consumption details saved in your account
+                    </p>
+                </div>
+            </div>
+
+            <div style="overflow-x:auto;">
+
+                <table style="width:100%;border-collapse:collapse;text-align:left;">
+
+                    <thead>
+                        <tr>
+                            <th style="padding:12px;">Appliance</th>
+                            <th style="padding:12px;">Power (W)</th>
+                            <th style="padding:12px;">Hours/Day</th>
+                            <th style="padding:12px;">Days</th>
+                            <th style="padding:12px;">Energy (kWh)</th>
+                            <th style="padding:12px;">Cost (₹)</th>
+                            <th style="padding:12px;">Date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for record in records %}
+
+                        <tr>
+                            <td style="padding:12px;">
+                                {{ record['device_name'] }}
+                            </td>
+
+                            <td style="padding:12px;">
+                                {{ record['rated_power_watts'] }}
+                            </td>
+
+                            <td style="padding:12px;">
+                                {{ record['usage_hours_per_day'] }}
+                            </td>
+
+                            <td style="padding:12px;">
+                                {{ record['usage_days'] }}
+                            </td>
+
+                            <td style="padding:12px;">
+                                {{ "%.2f"|format(record['energy_kwh']) }}
+                            </td>
+
+                            <td style="padding:12px;">
+                                ₹{{ "%.2f"|format(record['estimated_cost']) }}
+                            </td>
+
+                            <td style="padding:12px;">
+                                {{ record['entry_date'] }}
+                            </td>
+                        </tr>
+
+                        {% else %}
+
+                        <tr>
+                            <td colspan="7"
+                                style="padding:15px;text-align:center;">
+                                No energy records available.
+                                Add your first appliance.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- ACTION BUTTONS -->
+        <section class="panel" style="margin-bottom:25px;">
+
+            <div class="panel-header">
+                <div>
+                    <h3>Manage Your Energy</h3>
+                    <p>
+                        Add more consumption records or visit the main dashboard
+                    </p>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+
+                <a href="/add-energy-record"
+                   style="background:#1769aa;color:white;padding:12px 18px;border-radius:8px;font-size:12px;">
+                    + Add Energy Record
+                </a>
+
+                <a href="/"
+                   style="background:#172338;color:white;padding:12px 18px;border-radius:8px;font-size:12px;">
+                    Main Dataset Dashboard
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- FOOTER -->
+        <footer>
+            <span>SmartEnergy AI</span>
+
+            <span>
+                Personal Energy Consumption & Power Management
+            </span>
+        </footer>
+
+    </main>
+
+
+    <!-- PERSONAL DASHBOARD JAVASCRIPT -->
+    <script>
+
+        let dailyChart;
+        let deviceChart;
+
+
+        // LOAD PERSONAL SUMMARY
+        async function loadSummary() {
+
+            const response = await fetch(
+                "/api/my-energy/summary"
+            );
+
+            if (!response.ok) {
+                throw new Error("Unable to load personal summary");
+            }
+
+            const data = await response.json();
+
+            document.getElementById("totalEnergy").textContent =
+                Number(data.total_energy_kwh).toLocaleString(
+                    undefined,
+                    { maximumFractionDigits: 2 }
+                ) + " kWh";
+
+            document.getElementById("estimatedCost").textContent =
+                "₹" + Number(data.estimated_cost).toLocaleString(
+                    undefined,
+                    { maximumFractionDigits: 2 }
+                );
+
+            document.getElementById("totalRecords").textContent =
+                data.total_records;
+
+            document.getElementById("totalDevices").textContent =
+                data.total_devices;
+
+            document.getElementById("overviewRecords").textContent =
+                data.total_records;
+
+            document.getElementById("overviewDevices").textContent =
+                data.total_devices;
+
+            document.getElementById("aiInsight").textContent =
+                data.ai_insight;
+
+        }
+
+
+        // LOAD PERSONAL DAILY CHART
+        async function loadDailyChart() {
+
+            const response = await fetch(
+                "/api/my-energy/daily-consumption"
+            );
+
+            if (!response.ok) {
+                throw new Error("Unable to load personal daily data");
+            }
+
+            const data = await response.json();
+
+            const labels = data.map(item => item.date);
+
+            const values = data.map(item => item.energy_kwh);
+
+            const context = document
+                .getElementById("dailyChart")
+                .getContext("2d");
+
+            dailyChart = new Chart(context, {
+
+                type: "line",
+
+                data: {
+                    labels: labels,
+
+                    datasets: [{
+                        label: "Personal Energy (kWh)",
+                        data: values,
+                        borderWidth: 3,
+                        tension: 0.35,
+                        fill: true,
+                        borderColor: "#258bd5",
+                        backgroundColor: "rgba(37,139,213,0.12)",
+                        pointRadius: 4
+                    }]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        },
+
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+
+            });
+
+        }
+
+
+        // LOAD PERSONAL DEVICE CHART
+        async function loadDeviceChart() {
+
+            const response = await fetch(
+                "/api/my-energy/device-consumption"
+            );
+
+            if (!response.ok) {
+                throw new Error("Unable to load personal device data");
+            }
+
+            const data = await response.json();
+
+            const labels = data.map(
+                item => item.device_name
+            );
+
+            const values = data.map(
+                item => item.energy_kwh
+            );
+
+            const context = document
+                .getElementById("deviceChart")
+                .getContext("2d");
+
+            deviceChart = new Chart(context, {
+
+                type: "doughnut",
+
+                data: {
+                    labels: labels,
+
+                    datasets: [{
+                        data: values,
+                        borderWidth: 2
+                    }]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+
+                            labels: {
+                                padding: 14
+                            }
+                        }
+                    }
+                }
+
+            });
+
+        }
+
+
+        // INITIALIZE PERSONAL DASHBOARD
+        async function initializeDashboard() {
+
+            try {
+
+                await loadSummary();
+
+                await loadDailyChart();
+
+                await loadDeviceChart();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Personal dashboard error:",
+                    error
+                );
+
+                document.getElementById("aiInsight").textContent =
+                    "Unable to load dashboard information. Please refresh the page.";
+
+            }
+
+        }
+
+
+        initializeDashboard();
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SmartEnergy AI | Analytics</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 22px;
+            margin-top: 28px;
+        }
+
+        .analytics-card {
+            background: white;
+            border: 1px solid #e7edf5;
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 8px 25px rgba(20, 40, 70, 0.06);
+        }
+
+        .analytics-card.full {
+            grid-column: 1 / -1;
+        }
+
+        .card-header {
+            margin-bottom: 20px;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            color: #10233f;
+            font-size: 20px;
+        }
+
+        .card-header p {
+            margin: 7px 0 0;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .chart-box {
+            position: relative;
+            height: 330px;
+        }
+
+        .insight-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .insight-item {
+            padding: 16px;
+            border-radius: 14px;
+            background: #f7f9fc;
+            border: 1px solid #edf1f6;
+        }
+
+        .insight-item strong {
+            display: block;
+            color: #183250;
+            margin-bottom: 5px;
+        }
+
+        .insight-item span {
+            color: #718096;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .peak-box {
+            padding: 22px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #eef7ff, #f7fbff);
+            border: 1px solid #dcecff;
+        }
+
+        .peak-label {
+            color: #718096;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .peak-time {
+            font-size: 32px;
+            font-weight: 800;
+            color: #10233f;
+        }
+
+        .peak-energy {
+            margin-top: 5px;
+            color: #5d718a;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 14px;
+            background: #f5f8fc;
+            color: #5d718a;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #edf1f6;
+            color: #253b57;
+            font-size: 14px;
+        }
+
+        .rank {
+            font-weight: 800;
+            color: #4a6fa5;
+        }
+
+        @media (max-width: 950px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .analytics-card.full {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">⚡</div>
+
+            <div>
+                <h2>SmartEnergy</h2>
+                <p>AI Power Manager</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="/" class="nav-item">
+                🏠 <span>Dashboard</span>
+            </a>
+
+            <a href="/devices" class="nav-item">
+                🔌 <span>Devices</span>
+            </a>
+
+            <a href="/analytics" class="nav-item active">
+                📊 <span>Analytics</span>
+            </a>
+
+            <a href="/forecast" class="nav-item">
+                🔮 <span>AI Forecast</span>
+            </a>
+
+            <a href="/anomalies" class="nav-item">
+                🚨 <span>Anomalies</span>
+            </a>
+
+            <a href="/advisor" class="nav-item">
+                💡 <span>AI Advisor</span>
+            </a>
+
+            <a href="/reports" class="nav-item">
+                📑 <span>Reports</span>
+            </a>
+
+        </nav>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+
+            <div>
+                <strong>System Online</strong>
+                <small>AI services active</small>
+            </div>
+        </div>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <div class="eyebrow">
+                    ENERGY MANAGEMENT PLATFORM
+                </div>
+
+                <h1>Energy Analytics</h1>
+
+                <p class="page-intro">
+                    Analyze consumption trends, device usage and peak demand.
+                </p>
+            </div>
+
+            <div class="topbar-actions">
+
+                <div class="live-badge">
+                    <span class="status-dot"></span>
+                    Live Monitoring
+                </div>
+
+                <div class="ai-badge">
+                    AI
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="analytics-grid">
+
+            <!-- Daily Consumption -->
+
+            <div class="analytics-card">
+
+                <div class="card-header">
+
+                    <h2>Daily Energy Consumption</h2>
+
+                    <p>
+                        Total electricity consumption recorded each day.
+                    </p>
+
+                </div>
+
+                <div class="chart-box">
+                    <canvas id="dailyChart"></canvas>
+                </div>
+
+            </div>
+
+
+            <!-- Peak Hour -->
+
+            <div class="analytics-card">
+
+                <div class="card-header">
+
+                    <h2>Peak Demand</h2>
+
+                    <p>
+                        Highest combined energy consumption period.
+                    </p>
+
+                </div>
+
+                <div class="peak-box">
+
+                    <div class="peak-label">
+                        Peak Consumption Hour
+                    </div>
+
+                    <div class="peak-time" id="peakHour">
+                        --:--
+                    </div>
+
+                    <div class="peak-energy" id="peakEnergy">
+                        Loading...
+                    </div>
+
+                </div>
+
+                <br>
+
+                <div class="insight-list">
+
+                    <div class="insight-item">
+
+                        <strong>Why it matters</strong>
+
+                        <span>
+                            Peak periods can increase energy demand and
+                            operating costs.
+                        </span>
+
+                    </div>
+
+                    <div class="insight-item">
+
+                        <strong>Optimization opportunity</strong>
+
+                        <span>
+                            Consider shifting non-essential activities
+                            away from peak hours.
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Device Consumption -->
+
+            <div class="analytics-card full">
+
+                <div class="card-header">
+
+                    <h2>Device-wise Energy Consumption</h2>
+
+                    <p>
+                        Ranking of devices based on total monitored usage.
+                    </p>
+
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>Rank</th>
+                                <th>Device</th>
+                                <th>Total Energy</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="deviceTable">
+
+                            <tr>
+                                <td colspan="3">
+                                    Loading analytics...
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- Analytics Insights -->
+
+            <div class="analytics-card full">
+
+                <div class="card-header">
+
+                    <h2>Automated Energy Insights</h2>
+
+                    <p>
+                        Insights generated from the monitored energy data.
+                    </p>
+
+                </div>
+
+                <div class="insight-list">
+
+                    <div class="insight-item">
+
+                        <strong>Highest Energy Consumer</strong>
+
+                        <span id="highestDevice">
+                            Analyzing device consumption...
+                        </span>
+
+                    </div>
+
+                    <div class="insight-item">
+
+                        <strong>Peak Usage Period</strong>
+
+                        <span id="peakInsight">
+                            Analyzing peak consumption...
+                        </span>
+
+                    </div>
+
+                    <div class="insight-item">
+
+                        <strong>Monitoring Coverage</strong>
+
+                        <span>
+                            The system currently analyzes 30 days of
+                            historical energy consumption across 7 devices.
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <footer class="footer">
+
+            SmartEnergy AI • Intelligent Energy Monitoring & Power Management
+
+        </footer>
+
+    </main>
+
+
+    <script>
+
+        async function loadAnalytics() {
+
+            try {
+
+                const dailyResponse =
+                    await fetch("/api/daily-consumption");
+
+                const dailyData =
+                    await dailyResponse.json();
+
+
+                const labels =
+                    dailyData.map(item => item.date);
+
+                const values =
+                    dailyData.map(item => item.energy_kwh);
+
+
+                const ctx =
+                    document.getElementById("dailyChart");
+
+
+                new Chart(ctx, {
+
+                    type: "line",
+
+                    data: {
+
+                        labels: labels,
+
+                        datasets: [{
+
+                            label: "Energy Consumption (kWh)",
+
+                            data: values,
+
+                            borderWidth: 3,
+
+                            tension: 0.35,
+
+                            fill: true
+
+                        }]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        plugins: {
+
+                            legend: {
+                                display: true
+                            }
+
+                        },
+
+                        scales: {
+
+                            y: {
+
+                                beginAtZero: false,
+
+                                title: {
+
+                                    display: true,
+
+                                    text: "Energy (kWh)"
+
+                                }
+
+                            },
+
+                            x: {
+
+                                ticks: {
+
+                                    maxTicksLimit: 10
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                });
+
+
+                const deviceResponse =
+                    await fetch("/api/device-consumption");
+
+                const deviceData =
+                    await deviceResponse.json();
+
+
+                const table =
+                    document.getElementById("deviceTable");
+
+                table.innerHTML = "";
+
+
+                deviceData.forEach((device, index) => {
+
+                    const row =
+                        document.createElement("tr");
+
+                    row.innerHTML = `
+
+                        <td class="rank">
+                            #${index + 1}
+                        </td>
+
+                        <td>
+                            ${device.device_name}
+                        </td>
+
+                        <td>
+                            <strong>
+                                ${device.energy_kwh.toFixed(2)} kWh
+                            </strong>
+                        </td>
+
+                    `;
+
+                    table.appendChild(row);
+
+                });
+
+
+                if (deviceData.length > 0) {
+
+                    document.getElementById("highestDevice").textContent =
+                        `${deviceData[0].device_name} is the highest energy-consuming device with ${deviceData[0].energy_kwh.toFixed(2)} kWh during the monitored period.`;
+
+                }
+
+
+                const peakResponse =
+                    await fetch("/api/peak-hour");
+
+                const peakData =
+                    await peakResponse.json();
+
+
+                const formattedHour =
+                    String(peakData.hour).padStart(2, "0") + ":00";
+
+
+                document.getElementById("peakHour").textContent =
+                    formattedHour;
+
+
+                document.getElementById("peakEnergy").textContent =
+                    `${peakData.energy_kwh.toFixed(2)} kWh total consumption`;
+
+
+                document.getElementById("peakInsight").textContent =
+                    `The highest combined consumption occurs around ${formattedHour}, reaching ${peakData.energy_kwh.toFixed(2)} kWh.`;
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Analytics loading error:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        loadAnalytics();
+
+    </script>
+
+</body>
+</html>

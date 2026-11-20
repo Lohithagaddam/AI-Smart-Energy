@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SmartEnergy AI | Energy Advisor</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .advisor-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 28px;
+        }
+
+        .advisor-card {
+            background: white;
+            border: 1px solid #e7edf5;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 8px 25px rgba(20, 40, 70, 0.06);
+        }
+
+        .advisor-card.large {
+            grid-column: 1 / -1;
+        }
+
+        .recommendation-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .priority {
+            display: inline-block;
+            padding: 6px 11px;
+            border-radius: 18px;
+            font-size: 11px;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .priority.high {
+            background: #fff0f0;
+            color: #d9534f;
+        }
+
+        .priority.medium {
+            background: #fff7e8;
+            color: #b7791f;
+        }
+
+        .priority.low {
+            background: #edf8f1;
+            color: #16804b;
+        }
+
+        .recommendation-icon {
+            font-size: 30px;
+            margin-bottom: 12px;
+        }
+
+        .recommendation-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #10233f;
+            margin-bottom: 10px;
+        }
+
+        .recommendation-text {
+            color: #66778d;
+            font-size: 14px;
+            line-height: 1.65;
+        }
+
+        .saving-box {
+            margin-top: 18px;
+            padding-top: 15px;
+            border-top: 1px solid #edf1f6;
+        }
+
+        .saving-label {
+            color: #8a98aa;
+            font-size: 12px;
+        }
+
+        .saving-value {
+            color: #15945b;
+            font-size: 18px;
+            font-weight: 800;
+            margin-top: 4px;
+        }
+
+        .advisor-hero {
+            background: linear-gradient(135deg, #eef6ff, #f7fbff);
+            border: 1px solid #dceaff;
+            border-radius: 18px;
+            padding: 28px;
+            margin-top: 28px;
+        }
+
+        .hero-icon {
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+
+        .hero-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #10233f;
+            margin-bottom: 8px;
+        }
+
+        .hero-text {
+            color: #66778d;
+            max-width: 750px;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 18px;
+            padding: 7px 13px;
+            border-radius: 20px;
+            background: #eafaf1;
+            color: #168b55;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        @media (max-width: 950px) {
+            .advisor-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .advisor-card.large {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">⚡</div>
+
+            <div>
+                <h2>SmartEnergy</h2>
+                <p>AI Power Manager</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="/" class="nav-item">
+                🏠 <span>Dashboard</span>
+            </a>
+
+            <a href="/devices" class="nav-item">
+                🔌 <span>Devices</span>
+            </a>
+
+            <a href="/analytics" class="nav-item">
+                📊 <span>Analytics</span>
+            </a>
+
+            <a href="/forecast" class="nav-item">
+                🔮 <span>AI Forecast</span>
+            </a>
+
+            <a href="/anomalies" class="nav-item">
+                🚨 <span>Anomalies</span>
+            </a>
+
+            <a href="/advisor" class="nav-item active">
+                💡 <span>AI Advisor</span>
+            </a>
+
+            <a href="/reports" class="nav-item">
+                📑 <span>Reports</span>
+            </a>
+
+        </nav>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+
+            <div>
+                <strong>System Online</strong>
+                <small>AI services active</small>
+            </div>
+        </div>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <div class="eyebrow">
+                    INTELLIGENT ENERGY OPTIMIZATION
+                </div>
+
+                <h1>AI Energy Advisor</h1>
+
+                <p class="page-intro">
+                    Personalized recommendations to reduce energy consumption
+                    and improve operational efficiency.
+                </p>
+            </div>
+
+            <div class="topbar-actions">
+
+                <div class="live-badge">
+                    <span class="status-dot"></span>
+                    AI Advisor Active
+                </div>
+
+                <div class="ai-badge">
+                    AI
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="advisor-hero">
+
+            <div class="hero-icon">
+                💡
+            </div>
+
+            <div class="hero-title">
+                Smart Energy Recommendations
+            </div>
+
+            <div class="hero-text">
+                The AI Energy Advisor analyzes device consumption,
+                peak usage periods and historical energy patterns to
+                identify practical opportunities for saving electricity.
+            </div>
+
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                Recommendations generated from current energy data
+            </div>
+
+        </section>
+
+
+        <section class="advisor-grid"
+                 id="recommendationGrid">
+
+            <div class="advisor-card large">
+
+                <div class="empty-message">
+                    🤖 Generating intelligent recommendations...
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <footer class="footer">
+
+            SmartEnergy AI • Intelligent Energy Monitoring & Power Management
+
+        </footer>
+
+    </main>
+
+
+    <script>
+
+        async function loadRecommendations() {
+
+            try {
+
+                const response =
+                    await fetch("/api/recommendations");
+
+                const recommendations =
+                    await response.json();
+
+                const grid =
+                    document.getElementById(
+                        "recommendationGrid"
+                    );
+
+                grid.innerHTML = "";
+
+
+                if (!recommendations ||
+                    recommendations.length === 0) {
+
+                    grid.innerHTML = `
+
+                        <div class="advisor-card large">
+
+                            <div class="empty-message">
+
+                                No recommendations are currently
+                                available.
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                    return;
+                }
+
+
+                recommendations.forEach(
+                    (recommendation, index) => {
+
+                        const card =
+                            document.createElement("div");
+
+                        card.className =
+                            "advisor-card recommendation-card";
+
+
+                        let priorityClass =
+                            "low";
+
+                        if (
+                            recommendation.priority &&
+                            recommendation.priority.toLowerCase()
+                            === "high"
+                        ) {
+
+                            priorityClass = "high";
+
+                        } else if (
+                            recommendation.priority &&
+                            recommendation.priority.toLowerCase()
+                            === "medium"
+                        ) {
+
+                            priorityClass = "medium";
+
+                        }
+
+
+                        let icon = "💡";
+
+                        if (index === 0) {
+                            icon = "⚡";
+                        } else if (index === 1) {
+                            icon = "⏰";
+                        } else if (index === 2) {
+                            icon = "❄️";
+                        } else if (index === 3) {
+                            icon = "🚿";
+                        } else if (index === 4) {
+                            icon = "💡";
+                        } else if (index === 5) {
+                            icon = "📊";
+                        }
+
+
+                        let savingHtml = "";
+
+                        if (
+                            recommendation.potential_saving_kwh !==
+                            null &&
+                            recommendation.potential_saving_kwh !==
+                            undefined
+                        ) {
+
+                            savingHtml = `
+
+                                <div class="saving-box">
+
+                                    <div class="saving-label">
+                                        Potential Saving
+                                    </div>
+
+                                    <div class="saving-value">
+                                        ${Number(
+                                            recommendation
+                                            .potential_saving_kwh
+                                        ).toFixed(2)}
+                                        kWh
+                                    </div>
+
+                                </div>
+
+                            `;
+
+                        }
+
+
+                        card.innerHTML = `
+
+                            <span class="priority ${priorityClass}">
+                                ${recommendation.priority || "Low"}
+                                Priority
+                            </span>
+
+                            <div class="recommendation-icon">
+                                ${icon}
+                            </div>
+
+                            <div class="recommendation-title">
+                                ${recommendation.title}
+                            </div>
+
+                            <div class="recommendation-text">
+                                ${recommendation.message}
+                            </div>
+
+                            ${savingHtml}
+
+                        `;
+
+
+                        grid.appendChild(card);
+
+                    }
+                );
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Recommendation loading error:",
+                    error
+                );
+
+                document.getElementById(
+                    "recommendationGrid"
+                ).innerHTML = `
+
+                    <div class="advisor-card large">
+
+                        <div class="empty-message">
+
+                            Unable to load AI recommendations.
+                            Please check the Flask server.
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+
+        }
+
+
+        loadRecommendations();
+
+    </script>
+
+</body>
+</html>

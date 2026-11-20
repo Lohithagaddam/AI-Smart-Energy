@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports | SmartEnergy AI</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 20px;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .report-btn {
+            border: none;
+            padding: 11px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            background: #2563eb;
+            color: white;
+        }
+
+        .report-btn.secondary {
+            background: #374151;
+        }
+
+        .report-period {
+            background: #eef6ff;
+            border: 1px solid #dbeafe;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            color: #1e40af;
+            font-weight: 600;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            border: 1px solid #e5e7eb;
+        }
+
+        .report-card h4 {
+            margin: 0 0 10px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .report-value {
+            font-size: 25px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .report-section {
+            background: white;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            border: 1px solid #e5e7eb;
+        }
+
+        .report-section h3 {
+            margin-top: 0;
+            color: #111827;
+        }
+
+        .chart-container {
+            height: 320px;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .report-table th,
+        .report-table td {
+            padding: 13px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+        }
+
+        .report-table th {
+            background: #f8fafc;
+            color: #374151;
+        }
+
+        .rank {
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .ai-summary {
+            background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+            border-left: 5px solid #2563eb;
+            padding: 18px;
+            border-radius: 10px;
+            line-height: 1.7;
+        }
+
+        .finding-list {
+            margin: 10px 0 0;
+            padding-left: 20px;
+        }
+
+        .finding-list li {
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 1000px) {
+            .report-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .report-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .report-actions {
+                width: 100%;
+            }
+
+            .report-btn {
+                flex: 1;
+            }
+        }
+
+        @media print {
+            .sidebar,
+            .report-actions {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+
+            .report-section,
+            .report-card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <div class="logo-icon">⚡</div>
+            <div>
+                <h2>SmartEnergy</h2>
+                <span>AI POWER MANAGEMENT</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="/" class="nav-item">
+                <span>🏠</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="/devices" class="nav-item">
+                <span>🔌</span>
+                <span>Devices</span>
+            </a>
+
+            <a href="/analytics" class="nav-item">
+                <span>📊</span>
+                <span>Analytics</span>
+            </a>
+
+            <a href="/forecast" class="nav-item">
+                <span>🤖</span>
+                <span>AI Forecast</span>
+            </a>
+
+            <a href="/anomalies" class="nav-item">
+                <span>🚨</span>
+                <span>Anomalies</span>
+            </a>
+
+            <a href="/advisor" class="nav-item">
+                <span>💡</span>
+                <span>AI Advisor</span>
+            </a>
+
+            <a href="/reports" class="nav-item active">
+                <span>📑</span>
+                <span>Reports</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="status-dot"></div>
+            AI System Online
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <div class="report-header">
+
+            <div>
+                <h1>Energy Reports</h1>
+                <p>Comprehensive energy consumption and AI analysis report</p>
+            </div>
+
+            <div class="report-actions">
+                <button class="report-btn" onclick="window.print()">
+                    🖨 Print Report
+                </button>
+
+                <button class="report-btn secondary" onclick="downloadReport()">
+                    ⬇ Download CSV
+                </button>
+            </div>
+
+        </div>
+
+
+        <!-- REPORT PERIOD -->
+        <div class="report-period">
+            📅 Reporting Period: September 1, 2026 – September 30, 2026
+        </div>
+
+
+        <!-- SUMMARY CARDS -->
+        <div class="report-grid">
+
+            <div class="report-card">
+                <h4>Total Energy Consumption</h4>
+                <div class="report-value" id="totalEnergy">--</div>
+            </div>
+
+            <div class="report-card">
+                <h4>Estimated Electricity Cost</h4>
+                <div class="report-value" id="totalCost">--</div>
+            </div>
+
+            <div class="report-card">
+                <h4>Peak Consumption Hour</h4>
+                <div class="report-value" id="peakHour">--</div>
+            </div>
+
+            <div class="report-card">
+                <h4>Efficiency Score</h4>
+                <div class="report-value" id="efficiency">--</div>
+            </div>
+
+        </div>
+
+
+        <!-- DAILY CONSUMPTION -->
+        <div class="report-section">
+
+            <h3>📈 Daily Energy Consumption</h3>
+
+            <p>
+                Daily electricity consumption recorded during the reporting period.
+            </p>
+
+            <div class="chart-container">
+                <canvas id="dailyChart"></canvas>
+            </div>
+
+        </div>
+
+
+        <!-- DEVICE ANALYSIS -->
+        <div class="report-section">
+
+            <h3>🔌 Device-wise Energy Consumption</h3>
+
+            <p>
+                Energy usage ranking across monitored devices.
+            </p>
+
+            <table class="report-table">
+
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Device</th>
+                        <th>Energy Consumption</th>
+                        <th>Share of Usage</th>
+                    </tr>
+                </thead>
+
+                <tbody id="deviceTable">
+                    <tr>
+                        <td colspan="4">Loading report data...</td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- AI SUMMARY -->
+        <div class="report-section">
+
+            <h3>🤖 AI-Generated Energy Summary</h3>
+
+            <div class="ai-summary">
+
+                <strong>SmartEnergy AI Analysis</strong>
+
+                <p>
+                    The energy monitoring system analyzed consumption data
+                    across all registered devices during the reporting period.
+                    The analysis identifies major consumption sources,
+                    peak-demand periods, and potential areas for optimization.
+                </p>
+
+                <ul class="finding-list">
+
+                    <li>
+                        <strong id="findingEnergy">--</strong>
+                        of total energy was consumed during the reporting period.
+                    </li>
+
+                    <li>
+                        The highest demand period occurred around
+                        <strong id="findingPeak">--</strong>.
+                    </li>
+
+                    <li>
+                        The system calculated an application-defined
+                        energy efficiency score of
+                        <strong id="findingEfficiency">--</strong>.
+                    </li>
+
+                    <li>
+                        AI recommendations can help reduce unnecessary
+                        consumption and improve operational efficiency.
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+
+        <!-- REPORT CONCLUSION -->
+        <div class="report-section">
+
+            <h3>📌 Report Conclusion</h3>
+
+            <p>
+                SmartEnergy AI provides a centralized view of electricity
+                consumption and converts raw energy data into actionable
+                information. The report combines historical analytics,
+                device-level monitoring, AI forecasting, anomaly detection,
+                and intelligent recommendations to support energy-aware
+                decision making.
+            </p>
+
+            <p>
+                Continuous monitoring and implementation of the recommended
+                energy-saving actions can help organizations identify
+                inefficient usage patterns and improve overall energy
+                management.
+            </p>
+
+        </div>
+
+        <footer class="footer">
+            SmartEnergy AI • AI-Assisted Smart Energy Consumption and Power Management System
+        </footer>
+
+    </main>
+
+</div>
+
+
+<script>
+
+let deviceData = [];
+let dailyData = [];
+
+
+/* LOAD REPORT DATA */
+async function loadReport() {
+
+    try {
+
+        const summaryResponse = await fetch("/api/summary");
+        const summary = await summaryResponse.json();
+
+        document.getElementById("totalEnergy").textContent =
+            Number(summary.total_energy).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + " kWh";
+
+        document.getElementById("totalCost").textContent =
+            "₹" + Number(summary.estimated_cost).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+        document.getElementById("peakHour").textContent =
+            summary.peak_hour;
+
+        document.getElementById("efficiency").textContent =
+            summary.efficiency_score + "/100";
+
+
+        document.getElementById("findingEnergy").textContent =
+            Number(summary.total_energy).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + " kWh";
+
+        document.getElementById("findingPeak").textContent =
+            summary.peak_hour;
+
+        document.getElementById("findingEfficiency").textContent =
+            summary.efficiency_score + "/100";
+
+
+        /* DAILY DATA */
+
+        const dailyResponse =
+            await fetch("/api/daily-consumption");
+
+        dailyData = await dailyResponse.json();
+
+        createDailyChart();
+
+
+        /* DEVICE DATA */
+
+        const deviceResponse =
+            await fetch("/api/device-consumption");
+
+        deviceData = await deviceResponse.json();
+
+        createDeviceTable();
+
+    }
+
+    catch (error) {
+
+        console.error("Report loading error:", error);
+
+    }
+
+}
+
+
+/* DAILY CHART */
+function createDailyChart() {
+
+    const labels = dailyData.map(item => item.date);
+
+    const values = dailyData.map(item => item.energy_kwh);
+
+    new Chart(
+        document.getElementById("dailyChart"),
+        {
+            type: "line",
+
+            data: {
+                labels: labels,
+
+                datasets: [{
+                    label: "Daily Energy (kWh)",
+                    data: values,
+                    tension: 0.35,
+                    fill: true
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                },
+
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        }
+    );
+}
+
+
+/* DEVICE TABLE */
+function createDeviceTable() {
+
+    const table =
+        document.getElementById("deviceTable");
+
+    table.innerHTML = "";
+
+    const total =
+        deviceData.reduce(
+            (sum, item) => sum + Number(item.energy_kwh),
+            0
+        );
+
+    deviceData
+        .sort((a, b) =>
+            Number(b.energy_kwh) -
+            Number(a.energy_kwh)
+        )
+        .forEach((device, index) => {
+
+            const energy =
+                Number(device.energy_kwh);
+
+            const share =
+                total > 0
+                ? ((energy / total) * 100).toFixed(1)
+                : 0;
+
+            const row =
+                document.createElement("tr");
+
+            row.innerHTML = `
+                <td class="rank">#${index + 1}</td>
+
+                <td>
+                    <strong>${device.device_name}</strong>
+                </td>
+
+                <td>
+                    ${energy.toFixed(2)} kWh
+                </td>
+
+                <td>
+                    ${share}%
+                </td>
+            `;
+
+            table.appendChild(row);
+
+        });
+}
+
+
+/* DOWNLOAD CSV */
+function downloadReport() {
+
+    if (!deviceData.length) {
+        alert("Report data is still loading. Please try again.");
+        return;
+    }
+
+    let csv =
+        "Rank,Device,Energy Consumption (kWh),Share (%)\n";
+
+    const total =
+        deviceData.reduce(
+            (sum, item) =>
+                sum + Number(item.energy_kwh),
+            0
+        );
+
+    deviceData
+        .sort((a, b) =>
+            Number(b.energy_kwh) -
+            Number(a.energy_kwh)
+        )
+        .forEach((device, index) => {
+
+            const energy =
+                Number(device.energy_kwh);
+
+            const share =
+                ((energy / total) * 100).toFixed(1);
+
+            csv +=
+                `${index + 1},` +
+                `"${device.device_name}",` +
+                `${energy.toFixed(2)},` +
+                `${share}\n`;
+        });
+
+
+    const blob =
+        new Blob([csv], {
+            type: "text/csv;charset=utf-8;"
+        });
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const link =
+        document.createElement("a");
+
+    link.href = url;
+
+    link.download =
+        "SmartEnergy_Report.csv";
+
+    link.click();
+
+    URL.revokeObjectURL(url);
+}
+
+
+/* START */
+loadReport();
+
+</script>
+
+</body>
+</html>

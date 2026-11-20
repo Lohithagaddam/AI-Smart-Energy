@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SmartEnergy AI | Anomaly Detection</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .anomaly-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-top: 28px;
+        }
+
+        .anomaly-card {
+            background: white;
+            border: 1px solid #e7edf5;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 8px 25px rgba(20, 40, 70, 0.06);
+        }
+
+        .anomaly-card.large {
+            grid-column: 1 / -1;
+        }
+
+        .card-header {
+            margin-bottom: 20px;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            color: #10233f;
+            font-size: 20px;
+        }
+
+        .card-header p {
+            margin: 7px 0 0;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .metric-label {
+            color: #718096;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            color: #10233f;
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        .danger-value {
+            color: #d9534f;
+        }
+
+        .warning-box {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 15px;
+            padding: 18px;
+        }
+
+        .warning-title {
+            color: #b45309;
+            font-weight: 800;
+            margin-bottom: 7px;
+        }
+
+        .warning-text {
+            color: #7c5a2d;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .ai-box {
+            background: linear-gradient(135deg, #f0f7ff, #f9fbff);
+            border: 1px solid #dceaff;
+            border-radius: 15px;
+            padding: 18px;
+        }
+
+        .ai-title {
+            font-weight: 800;
+            color: #10233f;
+            margin-bottom: 8px;
+        }
+
+        .ai-text {
+            color: #66778d;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .anomaly-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .anomaly-table th {
+            text-align: left;
+            padding: 14px;
+            background: #f5f8fc;
+            color: #5d718a;
+            font-size: 13px;
+        }
+
+        .anomaly-table td {
+            padding: 14px;
+            border-bottom: 1px solid #edf1f6;
+            color: #253b57;
+            font-size: 14px;
+        }
+
+        .anomaly-badge {
+            display: inline-block;
+            padding: 6px 11px;
+            border-radius: 18px;
+            background: #fff0f0;
+            color: #d9534f;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .score {
+            font-weight: 700;
+            color: #c2413d;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 30px;
+            color: #718096;
+        }
+
+        @media (max-width: 900px) {
+            .anomaly-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .anomaly-card.large {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">⚡</div>
+
+            <div>
+                <h2>SmartEnergy</h2>
+                <p>AI Power Manager</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="/" class="nav-item">
+                🏠 <span>Dashboard</span>
+            </a>
+
+            <a href="/devices" class="nav-item">
+                🔌 <span>Devices</span>
+            </a>
+
+            <a href="/analytics" class="nav-item">
+                📊 <span>Analytics</span>
+            </a>
+
+            <a href="/forecast" class="nav-item">
+                🔮 <span>AI Forecast</span>
+            </a>
+
+            <a href="/anomalies" class="nav-item active">
+                🚨 <span>Anomalies</span>
+            </a>
+
+            <a href="/advisor" class="nav-item">
+                💡 <span>AI Advisor</span>
+            </a>
+
+            <a href="/reports" class="nav-item">
+                📑 <span>Reports</span>
+            </a>
+
+        </nav>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+
+            <div>
+                <strong>System Online</strong>
+                <small>AI services active</small>
+            </div>
+        </div>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <div class="eyebrow">
+                    ARTIFICIAL INTELLIGENCE ENGINE
+                </div>
+
+                <h1>Anomaly Detection</h1>
+
+                <p class="page-intro">
+                    Identify unusual electricity consumption using AI.
+                </p>
+            </div>
+
+            <div class="topbar-actions">
+
+                <div class="live-badge">
+                    <span class="status-dot"></span>
+                    AI Monitoring Active
+                </div>
+
+                <div class="ai-badge">
+                    AI
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="anomaly-grid">
+
+            <!-- Total Anomalies -->
+
+            <div class="anomaly-card">
+
+                <div class="metric-label">
+                    Detected Anomalies
+                </div>
+
+                <div class="metric-value danger-value"
+                     id="anomalyCount">
+                    Loading...
+                </div>
+
+            </div>
+
+
+            <!-- AI Model -->
+
+            <div class="anomaly-card">
+
+                <div class="metric-label">
+                    Detection Model
+                </div>
+
+                <div class="metric-value"
+                     style="font-size:22px;">
+                    Isolation Forest
+                </div>
+
+            </div>
+
+
+            <!-- Monitoring -->
+
+            <div class="anomaly-card">
+
+                <div class="metric-label">
+                    Records Analyzed
+                </div>
+
+                <div class="metric-value"
+                     id="recordsAnalyzed">
+                    5,040
+                </div>
+
+            </div>
+
+
+            <!-- Alert -->
+
+            <div class="anomaly-card">
+
+                <div class="warning-box">
+
+                    <div class="warning-title">
+                        ⚠️ Energy Monitoring Alert
+                    </div>
+
+                    <div class="warning-text">
+                        The AI system continuously checks energy readings
+                        for unusual consumption patterns that may require
+                        investigation.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- AI Explanation -->
+
+            <div class="anomaly-card">
+
+                <div class="ai-box">
+
+                    <div class="ai-title">
+                        🤖 How AI Detects Anomalies
+                    </div>
+
+                    <div class="ai-text">
+                        Isolation Forest analyzes energy readings and
+                        identifies observations that differ significantly
+                        from normal consumption patterns.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Action -->
+
+            <div class="anomaly-card">
+
+                <div class="ai-box">
+
+                    <div class="ai-title">
+                        🔍 Recommended Action
+                    </div>
+
+                    <div class="ai-text">
+                        Investigate unusual readings, check device
+                        operating conditions, and compare them with
+                        historical consumption.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Anomaly Table -->
+
+            <div class="anomaly-card large">
+
+                <div class="card-header">
+
+                    <h2>Detected Energy Anomalies</h2>
+
+                    <p>
+                        AI-identified consumption readings requiring
+                        attention.
+                    </p>
+
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table class="anomaly-table">
+
+                        <thead>
+
+                            <tr>
+                                <th>Date</th>
+                                <th>Hour</th>
+                                <th>Device</th>
+                                <th>Energy</th>
+                                <th>Anomaly Score</th>
+                                <th>Status</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="anomalyTable">
+
+                            <tr>
+                                <td colspan="6"
+                                    class="empty-message">
+                                    Running AI anomaly detection...
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <footer class="footer">
+
+            SmartEnergy AI • Intelligent Energy Monitoring & Power Management
+
+        </footer>
+
+    </main>
+
+
+    <script>
+
+        async function loadAnomalies() {
+
+            try {
+
+                const response =
+                    await fetch("/api/anomalies");
+
+                const anomalies =
+                    await response.json();
+
+
+                document.getElementById(
+                    "anomalyCount"
+                ).textContent =
+                    anomalies.length;
+
+
+                const table =
+                    document.getElementById(
+                        "anomalyTable"
+                    );
+
+
+                table.innerHTML = "";
+
+
+                if (anomalies.length === 0) {
+
+                    table.innerHTML = `
+
+                        <tr>
+
+                            <td colspan="6"
+                                class="empty-message">
+
+                                No unusual energy consumption
+                                detected.
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                    return;
+                }
+
+
+                anomalies
+                    .slice(0, 20)
+                    .forEach(anomaly => {
+
+                        const row =
+                            document.createElement("tr");
+
+
+                        const hour =
+                            String(anomaly.hour)
+                            .padStart(2, "0") + ":00";
+
+
+                        row.innerHTML = `
+
+                            <td>
+                                ${anomaly.date}
+                            </td>
+
+                            <td>
+                                ${hour}
+                            </td>
+
+                            <td>
+                                <strong>
+                                    ${anomaly.device_name}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${Number(
+                                    anomaly.energy_kwh
+                                ).toFixed(2)} kWh
+                            </td>
+
+                            <td class="score">
+                                ${Number(
+                                    anomaly.anomaly_score
+                                ).toFixed(4)}
+                            </td>
+
+                            <td>
+                                <span class="anomaly-badge">
+                                    🚨 ${anomaly.status}
+                                </span>
+                            </td>
+
+                        `;
+
+
+                        table.appendChild(row);
+
+                    });
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Anomaly loading error:",
+                    error
+                );
+
+                document.getElementById(
+                    "anomalyTable"
+                ).innerHTML = `
+
+                    <tr>
+
+                        <td colspan="6"
+                            class="empty-message">
+
+                            Unable to load anomaly data.
+                            Please check the Flask server.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+        }
+
+
+        loadAnomalies();
+
+    </script>
+
+</body>
+</html>

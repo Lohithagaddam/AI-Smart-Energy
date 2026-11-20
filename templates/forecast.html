@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SmartEnergy AI | AI Forecast</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 22px;
+            margin-top: 28px;
+        }
+
+        .forecast-card {
+            background: white;
+            border: 1px solid #e7edf5;
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 8px 25px rgba(20, 40, 70, 0.06);
+        }
+
+        .forecast-card.full {
+            grid-column: 1 / -1;
+        }
+
+        .card-header {
+            margin-bottom: 20px;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            color: #10233f;
+            font-size: 20px;
+        }
+
+        .card-header p {
+            margin: 7px 0 0;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .chart-box {
+            position: relative;
+            height: 360px;
+        }
+
+        .ai-model-box {
+            background: linear-gradient(135deg, #eef5ff, #f8fbff);
+            border: 1px solid #dce9fb;
+            border-radius: 16px;
+            padding: 22px;
+        }
+
+        .model-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .model-title {
+            font-size: 19px;
+            font-weight: 800;
+            color: #10233f;
+            margin-bottom: 8px;
+        }
+
+        .model-description {
+            color: #66778d;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .model-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 18px;
+            padding: 7px 12px;
+            border-radius: 20px;
+            background: #eafaf1;
+            color: #168b55;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .forecast-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .forecast-table th {
+            text-align: left;
+            padding: 14px;
+            background: #f5f8fc;
+            color: #5d718a;
+            font-size: 13px;
+        }
+
+        .forecast-table td {
+            padding: 14px;
+            border-bottom: 1px solid #edf1f6;
+            color: #253b57;
+            font-size: 14px;
+        }
+
+        .prediction-value {
+            font-weight: 800;
+            color: #2569a8;
+        }
+
+        .forecast-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            background: #eef6ff;
+            color: #3976ae;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .summary-box {
+            background: #f8fafc;
+            border: 1px solid #edf1f6;
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .summary-label {
+            color: #718096;
+            font-size: 12px;
+            margin-bottom: 7px;
+        }
+
+        .summary-value {
+            color: #10233f;
+            font-size: 23px;
+            font-weight: 800;
+        }
+
+        .loading {
+            color: #718096;
+            padding: 20px 0;
+        }
+
+        @media (max-width: 950px) {
+            .forecast-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .forecast-card.full {
+                grid-column: auto;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">⚡</div>
+
+            <div>
+                <h2>SmartEnergy</h2>
+                <p>AI Power Manager</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="/" class="nav-item">
+                🏠 <span>Dashboard</span>
+            </a>
+
+            <a href="/devices" class="nav-item">
+                🔌 <span>Devices</span>
+            </a>
+
+            <a href="/analytics" class="nav-item">
+                📊 <span>Analytics</span>
+            </a>
+
+            <a href="/forecast" class="nav-item active">
+                🔮 <span>AI Forecast</span>
+            </a>
+
+            <a href="/anomalies" class="nav-item">
+                🚨 <span>Anomalies</span>
+            </a>
+
+            <a href="/advisor" class="nav-item">
+                💡 <span>AI Advisor</span>
+            </a>
+
+            <a href="/reports" class="nav-item">
+                📑 <span>Reports</span>
+            </a>
+
+        </nav>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+
+            <div>
+                <strong>System Online</strong>
+                <small>AI services active</small>
+            </div>
+        </div>
+
+    </aside>
+
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <div class="eyebrow">
+                    ARTIFICIAL INTELLIGENCE ENGINE
+                </div>
+
+                <h1>AI Energy Forecast</h1>
+
+                <p class="page-intro">
+                    Predict future electricity demand using machine learning.
+                </p>
+            </div>
+
+            <div class="topbar-actions">
+
+                <div class="live-badge">
+                    <span class="status-dot"></span>
+                    AI Model Active
+                </div>
+
+                <div class="ai-badge">
+                    AI
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="forecast-grid">
+
+            <!-- Forecast Chart -->
+
+            <div class="forecast-card">
+
+                <div class="card-header">
+
+                    <h2>Next 24 Hours Forecast</h2>
+
+                    <p>
+                        Predicted total energy consumption for each hour.
+                    </p>
+
+                </div>
+
+                <div class="chart-box">
+                    <canvas id="forecastChart"></canvas>
+                </div>
+
+            </div>
+
+
+            <!-- AI Model -->
+
+            <div class="forecast-card">
+
+                <div class="card-header">
+
+                    <h2>AI Model</h2>
+
+                    <p>
+                        Forecasting engine information.
+                    </p>
+
+                </div>
+
+                <div class="ai-model-box">
+
+                    <div class="model-icon">
+                        🤖
+                    </div>
+
+                    <div class="model-title">
+                        Linear Regression
+                    </div>
+
+                    <div class="model-description">
+                        The model learns from historical energy consumption,
+                        date patterns, day of week and hourly usage to estimate
+                        future electricity demand.
+                    </div>
+
+                    <div class="model-status">
+                        <span class="status-dot"></span>
+                        Model Ready
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Forecast Summary -->
+
+            <div class="forecast-card full">
+
+                <div class="card-header">
+
+                    <h2>Forecast Summary</h2>
+
+                    <p>
+                        Key predictions generated by the AI forecasting model.
+                    </p>
+
+                </div>
+
+                <div class="summary-grid">
+
+                    <div class="summary-box">
+
+                        <div class="summary-label">
+                            Forecast Horizon
+                        </div>
+
+                        <div class="summary-value">
+                            24 Hours
+                        </div>
+
+                    </div>
+
+                    <div class="summary-box">
+
+                        <div class="summary-label">
+                            Predicted Average
+                        </div>
+
+                        <div class="summary-value"
+                             id="averagePrediction">
+                            Loading...
+                        </div>
+
+                    </div>
+
+                    <div class="summary-box">
+
+                        <div class="summary-label">
+                            Highest Predicted Hour
+                        </div>
+
+                        <div class="summary-value"
+                             id="highestPrediction">
+                            Loading...
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Forecast Table -->
+
+            <div class="forecast-card full">
+
+                <div class="card-header">
+
+                    <h2>Hourly AI Predictions</h2>
+
+                    <p>
+                        Detailed 24-hour energy demand forecast.
+                    </p>
+
+                </div>
+
+                <div style="overflow-x:auto;">
+
+                    <table class="forecast-table">
+
+                        <thead>
+
+                            <tr>
+                                <th>Date</th>
+                                <th>Hour</th>
+                                <th>Predicted Energy</th>
+                                <th>Forecast Status</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="forecastTable">
+
+                            <tr>
+                                <td colspan="4"
+                                    class="loading">
+                                    Loading AI predictions...
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- AI Explanation -->
+
+            <div class="forecast-card full">
+
+                <div class="card-header">
+
+                    <h2>How AI Forecasting Works</h2>
+
+                    <p>
+                        Simplified explanation for system users.
+                    </p>
+
+                </div>
+
+                <div class="insight-list">
+
+                    <div class="insight-item">
+
+                        <strong>1. Historical Data</strong>
+
+                        <span>
+                            The system uses previously recorded electricity
+                            consumption as training data.
+                        </span>
+
+                    </div>
+
+                    <div class="insight-item">
+
+                        <strong>2. Pattern Analysis</strong>
+
+                        <span>
+                            The model considers the day number, day of the
+                            week and hour of the day.
+                        </span>
+
+                    </div>
+
+                    <div class="insight-item">
+
+                        <strong>3. Future Prediction</strong>
+
+                        <span>
+                            The trained machine-learning model estimates
+                            electricity consumption for the next 24 hours.
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <footer class="footer">
+
+            SmartEnergy AI • Intelligent Energy Monitoring & Power Management
+
+        </footer>
+
+    </main>
+
+
+    <script>
+
+        async function loadForecast() {
+
+            try {
+
+                const response =
+                    await fetch("/api/forecast");
+
+                const forecasts =
+                    await response.json();
+
+
+                if (!forecasts || forecasts.length === 0) {
+                    return;
+                }
+
+
+                /* -----------------------------
+                   Chart Data
+                ----------------------------- */
+
+                const labels = forecasts.map(item =>
+                    String(item.hour).padStart(2, "0") + ":00"
+                );
+
+                const values = forecasts.map(item =>
+                    item.predicted_energy_kwh
+                );
+
+
+                const chart =
+                    document.getElementById("forecastChart");
+
+
+                new Chart(chart, {
+
+                    type: "line",
+
+                    data: {
+
+                        labels: labels,
+
+                        datasets: [{
+
+                            label: "Predicted Energy (kWh)",
+
+                            data: values,
+
+                            borderWidth: 3,
+
+                            tension: 0.35,
+
+                            fill: true
+
+                        }]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        maintainAspectRatio: false,
+
+                        plugins: {
+
+                            legend: {
+                                display: true
+                            }
+
+                        },
+
+                        scales: {
+
+                            y: {
+
+                                beginAtZero: true,
+
+                                title: {
+
+                                    display: true,
+
+                                    text: "Energy (kWh)"
+
+                                }
+
+                            },
+
+                            x: {
+
+                                title: {
+
+                                    display: true,
+
+                                    text: "Hour"
+
+                                },
+
+                                ticks: {
+
+                                    maxTicksLimit: 12
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                });
+
+
+                /* -----------------------------
+                   Summary
+                ----------------------------- */
+
+                const total =
+                    values.reduce(
+                        (sum, value) => sum + value,
+                        0
+                    );
+
+
+                const average =
+                    total / values.length;
+
+
+                const highest =
+                    Math.max(...values);
+
+
+                const highestIndex =
+                    values.indexOf(highest);
+
+
+                const highestHour =
+                    String(
+                        forecasts[highestIndex].hour
+                    ).padStart(2, "0") + ":00";
+
+
+                document.getElementById(
+                    "averagePrediction"
+                ).textContent =
+                    average.toFixed(2) + " kWh";
+
+
+                document.getElementById(
+                    "highestPrediction"
+                ).textContent =
+                    highestHour;
+
+
+                /* -----------------------------
+                   Forecast Table
+                ----------------------------- */
+
+                const table =
+                    document.getElementById(
+                        "forecastTable"
+                    );
+
+
+                table.innerHTML = "";
+
+
+                forecasts.forEach(item => {
+
+                    const row =
+                        document.createElement("tr");
+
+
+                    const hour =
+                        String(item.hour)
+                        .padStart(2, "0") + ":00";
+
+
+                    row.innerHTML = `
+
+                        <td>
+                            ${item.date}
+                        </td>
+
+                        <td>
+                            ${hour}
+                        </td>
+
+                        <td class="prediction-value">
+                            ${item.predicted_energy_kwh.toFixed(2)}
+                            kWh
+                        </td>
+
+                        <td>
+                            <span class="forecast-badge">
+                                AI Predicted
+                            </span>
+                        </td>
+
+                    `;
+
+
+                    table.appendChild(row);
+
+                });
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Forecast loading error:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        loadForecast();
+
+    </script>
+
+</body>
+</html>
